@@ -38,7 +38,8 @@ const escapar = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const entradas = [
   ...(existsSync(path.join(RAIZ, ".nomes-proibidos")) ? readFileSync(path.join(RAIZ, ".nomes-proibidos"), "utf8").split("\n") : []),
-  ...(process.env.CONFERIR_NOMES ?? "").split(/\n|,/),
+  // Só quebra de linha separa: vírgula dentro de comentário da lista virava nome.
+  ...(process.env.CONFERIR_NOMES ?? "").split("\n"),
 ]
   .map((n) => n.trim())
   .filter((n) => n && !n.startsWith("#"));
