@@ -1,0 +1,47 @@
+{
+  "sobre": "O que cada skill do plugin faz, em uma linha, pro painel de Skills e pro conector. Skill nova entra aqui junto com a pasta dela (scripts/conferir-catalogo.mjs barra o commit sem isso).",
+  "plugin": "skills@yagosiman",
+  "skills": [
+    {
+      "slug": "reverse-engineer-anything",
+      "nome": "Engenharia reversa",
+      "resumo": "Abre um site, app ou programa e mostra como ele funciona por dentro.",
+      "quando": "A pessoa manda o link de um site ou o arquivo de um app e quer entender como funciona ou reconstruir algo parecido.",
+      "precisa": "Claude Code com o plugin instalado",
+      "origem": "morluto/rea, licença MIT",
+      "servidor": "rea",
+      "cor": "#22d3ee",
+      "icone": "scan-search"
+    },
+    {
+      "slug": "google-ads-api-account-diagnostics",
+      "nome": "Diagnóstico do Google Ads",
+      "resumo": "Descobre por que uma conta do Google Ads piorou: conversão caindo, lead sumindo, verba travada ou impressão perdida pra concorrência.",
+      "quando": "A pessoa diz que a conversão caiu, o lead sumiu, a verba não gasta ou a campanha perdeu entrega no Google Ads e quer saber por quê.",
+      "precisa": "acesso à conta do Google Ads; com o MCP do Google Ads ligado, lê a conta sozinha",
+      "origem": "google/skills, licença Apache-2.0",
+      "cor": "#4285f4",
+      "icone": "stethoscope"
+    },
+    {
+      "slug": "google-ads-api-mcp-setup",
+      "nome": "Ligar o Claude no Google Ads",
+      "resumo": "Instala o servidor MCP oficial do Google Ads, que deixa o Claude ler a conta de anúncios (só leitura).",
+      "quando": "A pessoa quer conectar o Claude à conta de anúncios do Google pra perguntar de campanha e resultado em português.",
+      "precisa": "Python 3.12+ com pipx e a credencial da própria pessoa (developer token aprovado e OAuth do Google Cloud)",
+      "origem": "google/skills, licença Apache-2.0",
+      "cor": "#34a853",
+      "icone": "plug"
+    },
+    {
+      "slug": "google-ads-api-quickstart",
+      "nome": "Primeiros passos na API do Google Ads",
+      "resumo": "Monta a credencial da API do Google Ads e roda o primeiro script, que lista as campanhas da conta.",
+      "quando": "A pessoa quer começar na API do Google Ads, tirar o developer token ou resolver erro de acesso como token não aprovado.",
+      "precisa": "uma conta de administrador (MCC) do Google Ads e um projeto no Google Cloud",
+      "origem": "google/skills, licença Apache-2.0",
+      "cor": "#fbbc04",
+      "icone": "key-round"
+    }
+  ]
+}

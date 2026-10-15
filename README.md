@@ -62,6 +62,28 @@ quando faltar; a análise estática de JavaScript roda sem nenhum.
 Uso responsável: só em software próprio ou com autorização. Ver
 `plugins/skills/origens/rea/DISCLAIMER.md`.
 
+### Google Ads (3 skills do google/skills)
+
+Três skills oficiais do time da API do Google Ads, do repositório
+[google/skills](https://github.com/google/skills) (licença Apache-2.0, em
+`plugins/skills/origens/google-ads/`). Das 14 de anúncios que o Google publicou, só estas
+servem a quem roda campanha; as outras são de SDK de app (AdMob, IMA) e de subir dado pela
+Data Manager API.
+
+- `google-ads-api-account-diagnostics`: o diagnóstico da conta. Conversão ou valor caindo,
+  lead sumindo, impressão perdida por verba ou por classificação, upload offline falhando.
+- `google-ads-api-mcp-setup`: liga o servidor MCP oficial
+  ([googleads/google-ads-mcp](https://github.com/googleads/google-ads-mcp)), que só lê a conta.
+- `google-ads-api-quickstart`: a credencial da API e o primeiro script; resolve
+  `DEVELOPER_TOKEN_NOT_APPROVED` e afins.
+
+**O servidor não vem no plugin**, de propósito: ele liga com a credencial de cada pessoa
+(developer token de uma conta de administrador e OAuth do Google Cloud), e credencial não mora
+em repositório público. Quem quiser ler a conta ao vivo liga o seu com a skill de MCP, no
+escopo do usuário (`claude mcp add --scope user`). Sem ele o diagnóstico funciona do mesmo
+jeito, pelos relatórios da interface do Google Ads: a skill diz o que abrir e lê o resultado
+junto.
+
 ## A nossa cópia das skills de fora
 
 Skill que vem de outro repositório fica guardada aqui inteira, pra continuar existindo se o
@@ -70,9 +92,12 @@ autor mudar ou apagar a dele, com a origem e a licença em `plugins/skills/orige
 - **REA:** toda segunda a Action `Espelho do REA` confere o npm e, se saiu versão nova, abre
   um PR com a diferença. Nada entra sem revisão, e a versão anterior fica no histórico. Na
   mão: `node scripts/espelhar-rea.mjs` (a mais nova) ou `node scripts/espelhar-rea.mjs 6.5.0`.
-- O espelho copia a skill como veio e acrescenta só o bloco "Neste plugin" depois do
-  frontmatter. O que for ajuste nosso entra por esse mesmo caminho, pra a atualização do
-  autor não apagar.
+- **Google Ads:** toda segunda a Action `Espelho do Google Ads` confere o google/skills e, se
+  alguma das três skills mudou, abre um PR com a diferença. Na mão:
+  `node scripts/espelhar-google-ads.mjs` (o main de hoje) ou com um commit exato.
+- O espelho copia a skill como veio e acrescenta só o gatilho em português no fim da
+  `description` e o bloco "Neste plugin" depois do frontmatter. O que for ajuste nosso entra
+  por esse mesmo caminho, pra a atualização do autor não apagar.
 - O programa em si também fica guardado aqui, sem fork: cada versão vira um Release
   `rea-<versão>` com o pacote publicado anexado (Action `Guardar o pacote do REA`).
 
@@ -92,12 +117,25 @@ clone) e em cada push e PR (Action `Conferir o que é público`).
 ## Pôr uma skill nova
 
 1. Uma pasta em `plugins/skills/skills/<nome-da-skill>/` com o `SKILL.md` (e as referências
-   ao lado). Só isso: não tem número de versão pra subir, cada commit já é a atualização.
-2. Se ela depende de programa local, o servidor entra no `plugins/skills/.mcp.json` (formato
+   ao lado). Não tem número de versão pra subir, cada commit já é a atualização. A
+   `description` do `SKILL.md` é o gatilho: a skill liga sozinha quando o pedido bate com
+   ela, então escreva ali, com as palavras de quem pede, quando ela serve.
+2. Uma linha no `catalogo.json` (nome, o que faz numa frase, quando usar, cor e ícone): é o
+   que o painel de Skills do Cérebro e o conector mostram. O gancho de commit
+   (`scripts/conferir-catalogo.mjs`) barra skill sem linha e linha sem skill.
+3. Se ela depende de programa local, o servidor entra no `plugins/skills/.mcp.json` (formato
    `{"mcpServers": {...}}`). Programa em Node usa um lançador como o `bin/rea-mcp`, pra
    ninguém precisar instalar nada.
-3. Se veio de fora: conferir a licença antes de copiar (sem licença que permita, não entra)
+4. Se veio de fora: conferir a licença antes de copiar (sem licença que permita, não entra)
    e anotar origem e licença em `plugins/skills/origens/<nome>/`.
-4. Antes do commit: `claude plugin validate .`, `claude plugin validate
-   plugins/skills` e `node scripts/conferir-publico.mjs`. Sem `--strict`: o único aviso dele é
-   a falta de `version`, que é de propósito.
+5. Antes do commit: `claude plugin validate .`, `claude plugin validate
+   plugins/skills`, `node scripts/conferir-publico.mjs` e `node scripts/conferir-catalogo.mjs`.
+   Sem `--strict`: o único aviso dele é a falta de `version`, que é de propósito.
+
+## Como se sabe que uma skill está viva
+
+O plugin não tem como avisar ninguém sozinho (ele não guarda chave nenhuma). Quem conta é a
+IA, pelo conector do MegaBrain: no começo da conversa ela diz quais `skills:<nome>` tem
+instaladas, e ao terminar um trabalho com uma delas registra o uso (ou o erro, com o
+motivo) com `skill_registrar`. O painel de Skills, ao lado dos Conectores no Cérebro, junta
+isso com o `catalogo.json`: o que existe, quem tem, o último uso e o último erro.

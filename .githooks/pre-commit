@@ -1,3 +1,4 @@
 #!/bin/bash
-# Repositório público: nenhum commit passa com dado privado.
-exec node "$(git rev-parse --show-toplevel)/scripts/conferir-publico.mjs"
+# Repositório público: nenhum commit passa com dado privado, nem com skill fora do catálogo.
+RAIZ="$(git rev-parse --show-toplevel)"
+node "$RAIZ/scripts/conferir-publico.mjs" && exec node "$RAIZ/scripts/conferir-catalogo.mjs"

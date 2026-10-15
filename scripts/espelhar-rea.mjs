@@ -31,6 +31,9 @@ const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PLUGIN = path.join(RAIZ, "plugins", "skills");
 const ORIGEM = path.join(PLUGIN, "origens", "rea");
 const LANCADOR = path.join(PLUGIN, "bin", "rea-mcp");
+const GATILHO_PT =
+  "Also use it when the person sends the link of a website, app or program (or its file) and wants to understand how it works inside or rebuild something like it, " +
+  "even in Portuguese and without saying reverse engineering (como esse site funciona, quero recriar isso, o que esse app faz por baixo).";
 
 const pedido = process.argv[2] ?? "latest";
 const npm = (...args) => execFileSync("npm", args, { encoding: "utf8" }).trim();
@@ -66,6 +69,12 @@ try {
   const fim = texto.indexOf("\n---\n", 4);
   if (!texto.startsWith("---\n") || fim < 0) throw Error("SKILL.md sem frontmatter: o formato do REA mudou, revise o espelho.");
   const corte = fim + "\n---\n".length;
+  // O gatilho em português. A skill liga sozinha quando o pedido bate com a
+  // `description`, e a do REA só fala de alvo técnico em inglês: quem manda o
+  // link de um site e escreve "quero recriar isso" não casava. A frase vai no
+  // fim da mesma linha, sem dois-pontos nem aspas (é YAML sem aspas).
+  const frontmatter = texto.slice(0, corte).replace(/^(description: .+)$/m, `$1 ${GATILHO_PT}`);
+  if (!frontmatter.includes(GATILHO_PT)) throw Error("SKILL.md sem `description:` numa linha só: o formato do REA mudou, revise o espelho.");
   const bloco = [
     "",
     "> **Neste plugin.** O servidor MCP do REA já vem pelo plugin `skills` (`bin/rea-mcp`,",
@@ -76,9 +85,13 @@ try {
     "> (uns 2 minutos); se as ferramentas do REA não estiverem aqui, diga isso à pessoa e",
     "> peça pra reconectar o servidor em `/mcp` quando terminar. O registro fica em",
     "> `~/.claude/plugins/data/skills-yagosiman/preparar-*.log`.",
+    ">",
+    "> Com o conector do MegaBrain ligado, ao terminar registre com `skill_registrar`",
+    "> (tipo `uso` e o que fez numa frase; se falhou, tipo `erro` e o motivo): é o que",
+    "> mostra no painel de Skills do Cérebro que ela está viva.",
     "",
   ].join("\n");
-  writeFileSync(arquivoSkill, texto.slice(0, corte) + bloco + texto.slice(corte));
+  writeFileSync(arquivoSkill, frontmatter + bloco + texto.slice(corte));
 
   // --- licença e aviso de uso responsável -----------------------------------
   mkdirSync(ORIGEM, { recursive: true });

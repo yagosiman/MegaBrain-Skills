@@ -1,0 +1,56 @@
+# Toda segunda, confere se alguma das três skills de Google Ads mudou no
+# google/skills. Se mudou, roda o espelho e abre um PR com a diferença: nada
+# entra no main sem revisão, e a versão anterior fica no histórico do Git. O
+# google/skills recebe commit todo dia em outras pastas; o espelho só regrava a
+# origem quando o texto das nossas três muda, então semana sem mudança não abre PR.
+#
+# Precisa, nas configurações do repositório: Settings → Actions → General →
+# "Allow GitHub Actions to create and approve pull requests".
+
+name: Espelho do Google Ads
+
+on:
+  schedule:
+    - cron: "15 11 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  espelhar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Espelhar o main do google/skills
+        id: espelho
+        run: |
+          node scripts/espelhar-google-ads.mjs
+          commit=$(node -p 'require("fs").readFileSync("plugins/skills/origens/google-ads/UPSTREAM.md","utf8").match(/Commit: `([0-9a-f]{7})/)[1]')
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          if git diff --quiet; then echo "mudou=nao" >> "$GITHUB_OUTPUT"; else echo "mudou=sim" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Abrir PR
+        if: steps.espelho.outputs.mudou == 'sim'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT: ${{ steps.espelho.outputs.commit }}
+        run: |
+          ramo="espelho/google-ads-$COMMIT"
+          if git ls-remote --exit-code --heads origin "$ramo" > /dev/null; then
+            echo "Já existe PR aberto pra $COMMIT."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$ramo"
+          git add -A plugins/skills
+          git commit -m "google-ads: espelho do google/skills@$COMMIT"
+          git push origin "$ramo"
+          gh pr create --title "Google Ads @ $COMMIT" \
+            --body "Alguma das três skills de Google Ads mudou no google/skills. Revise o diff antes de aceitar: o que entrar aqui chega no Claude de quem instalou o plugin."

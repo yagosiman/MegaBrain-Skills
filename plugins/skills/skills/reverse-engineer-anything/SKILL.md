@@ -1,6 +1,6 @@
 ---
 name: reverse-engineer-anything
-description: Reverse engineer native, managed, Electron/JavaScript, packaged, firmware, and browser targets with REA. Use shipped-artifact or requested runtime evidence to explain features, compare versions, decompile code, or guide a reconstruction. Skip REA for ordinary source-repository architecture analysis.
+description: Reverse engineer native, managed, Electron/JavaScript, packaged, firmware, and browser targets with REA. Use shipped-artifact or requested runtime evidence to explain features, compare versions, decompile code, or guide a reconstruction. Skip REA for ordinary source-repository architecture analysis. Also use it when the person sends the link of a website, app or program (or its file) and wants to understand how it works inside or rebuild something like it, even in Portuguese and without saying reverse engineering (como esse site funciona, quero recriar isso, o que esse app faz por baixo).
 metadata:
   version: "42"
   tool_count: 207
@@ -14,6 +14,10 @@ metadata:
 > (uns 2 minutos); se as ferramentas do REA não estiverem aqui, diga isso à pessoa e
 > peça pra reconectar o servidor em `/mcp` quando terminar. O registro fica em
 > `~/.claude/plugins/data/skills-yagosiman/preparar-*.log`.
+>
+> Com o conector do MegaBrain ligado, ao terminar registre com `skill_registrar`
+> (tipo `uso` e o que fez numa frase; se falhou, tipo `erro` e o motivo): é o que
+> mostra no painel de Skills do Cérebro que ela está viva.
 
 # REA
 
