@@ -1,0 +1,39 @@
+# Guarda o programa do REA aqui mesmo, sem fork: cada versão que entra no
+# plugin vira um Release `rea-<versão>` com o pacote publicado no npm anexado.
+# Se o autor apagar o repositório ou o pacote, a nossa cópia continua aqui.
+# Roda quando a versão do plugin muda no main, e na mão (workflow_dispatch).
+
+name: Guardar o pacote do REA
+
+on:
+  push:
+    branches: [main]
+    paths: [plugins/rea/.claude-plugin/plugin.json]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  guardar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Anexar o pacote ao Release da versão
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          versao=$(node -p "require('./plugins/rea/.claude-plugin/plugin.json').version")
+          if gh release view "rea-$versao" > /dev/null 2>&1; then
+            echo "Release rea-$versao já existe."; exit 0
+          fi
+          npm pack "rea-agents@$versao" --ignore-scripts --silent
+          integridade=$(npm view "rea-agents@$versao" dist.integrity)
+          gh release create "rea-$versao" "rea-agents-$versao.tgz" \
+            --title "REA $versao" \
+            --notes "Cópia do pacote rea-agents $versao publicado no npm (morluto/rea, licença MIT), guardada pelo MegaBrain-Skills. Integridade: $integridade"

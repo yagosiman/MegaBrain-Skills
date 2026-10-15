@@ -72,8 +72,8 @@ autor mudar ou apagar a dele, com a origem anotada em `plugins/<nome>/UPSTREAM.m
 - O espelho copia a skill como veio e acrescenta só o bloco "Neste plugin" depois do
   frontmatter. O que for ajuste nosso entra por esse mesmo caminho, pra a atualização do
   autor não apagar.
-- O código do programa em si mora no pacote publicado; pra guardar também esse código,
-  mantenha um fork do repositório original no GitHub.
+- O programa em si também fica guardado aqui, sem fork: cada versão que entra no plugin vira
+  um Release `rea-<versão>` com o pacote publicado anexado (Action `Guardar o pacote do REA`).
 
 ## A trava de dado privado
 
