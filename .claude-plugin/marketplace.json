@@ -7,14 +7,14 @@
   },
   "plugins": [
     {
-      "name": "rea",
-      "description": "Engenharia reversa de app, binário, pacote, Electron, Android e página web. Traz a skill reverse-engineer-anything e o servidor MCP do REA juntos, sem precisar instalar Node (morluto/rea, licença MIT, espelhado aqui).",
+      "name": "skills",
+      "description": "As skills compartilhadas do MegaBrain num plugin só: instala uma vez e recebe toda skill nova sozinho.",
       "author": {
-        "name": "morluto"
+        "name": "Yago Siman"
       },
-      "homepage": "https://github.com/morluto/rea",
-      "category": "development",
-      "source": "./plugins/rea"
+      "homepage": "https://github.com/yagosiman/MegaBrain-Skills",
+      "category": "productivity",
+      "source": "./plugins/skills"
     }
   ]
 }

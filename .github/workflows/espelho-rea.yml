@@ -30,7 +30,7 @@ jobs:
         id: espelho
         run: |
           node scripts/espelhar-rea.mjs
-          versao=$(node -p "require('./plugins/rea/.claude-plugin/plugin.json').version")
+          versao=$(node -p 'require("fs").readFileSync("plugins/skills/bin/rea-mcp","utf8").match(/^REA="rea-agents@([^"]+)"/m)[1]')
           echo "versao=$versao" >> "$GITHUB_OUTPUT"
           if git diff --quiet; then echo "mudou=nao" >> "$GITHUB_OUTPUT"; else echo "mudou=sim" >> "$GITHUB_OUTPUT"; fi
 
@@ -47,7 +47,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$ramo"
-          git commit -am "rea: espelho da versão $VERSAO"
+          git add -A plugins/skills
+          git commit -m "rea: espelho da versão $VERSAO"
           git push origin "$ramo"
           gh pr create --title "REA $VERSAO" \
             --body "Versão nova do rea-agents publicada no npm. Revise o diff da skill antes de aceitar: o que entrar aqui chega no Claude de quem instalou o plugin."

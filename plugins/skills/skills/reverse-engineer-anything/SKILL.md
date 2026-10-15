@@ -6,14 +6,14 @@ metadata:
   tool_count: 207
 ---
 
-> **Neste plugin.** O servidor MCP do REA já vem pelo plugin `rea` (`bin/rea-mcp`,
+> **Neste plugin.** O servidor MCP do REA já vem pelo plugin `skills` (`bin/rea-mcp`,
 > que roda `rea-agents@6.5.0`). Ele usa o Node da máquina se servir e, se não,
 > baixa sozinho um Node privado na pasta de dados do plugin: não peça pra pessoa
 > instalar Node e não rode `rea setup`, que registraria uma segunda cópia fora do
 > plugin. Na primeira sessão depois de instalar, o plugin se prepara em segundo plano
 > (uns 2 minutos); se as ferramentas do REA não estiverem aqui, diga isso à pessoa e
 > peça pra reconectar o servidor em `/mcp` quando terminar. O registro fica em
-> `~/.claude/plugins/data/rea-yagosiman/preparar-*.log`.
+> `~/.claude/plugins/data/skills-yagosiman/preparar-*.log`.
 
 # REA
 

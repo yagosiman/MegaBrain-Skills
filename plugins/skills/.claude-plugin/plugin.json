@@ -1,0 +1,11 @@
+{
+  "name": "skills",
+  "description": "As skills compartilhadas do MegaBrain num plugin só: instala uma vez e recebe toda skill nova sozinho. Hoje: engenharia reversa com o REA (morluto/rea, licença MIT), com o servidor MCP e sem precisar instalar Node.",
+  "author": {
+    "name": "Yago Siman"
+  },
+  "homepage": "https://github.com/yagosiman/MegaBrain-Skills",
+  "repository": "https://github.com/yagosiman/MegaBrain-Skills",
+  "license": "MIT",
+  "keywords": ["skills", "engenharia-reversa", "reverse-engineering", "mcp"]
+}
