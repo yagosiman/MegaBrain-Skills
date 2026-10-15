@@ -84,6 +84,37 @@ escopo do usuário (`claude mcp add --scope user`). Sem ele o diagnóstico funci
 jeito, pelos relatórios da interface do Google Ads: a skill diz o que abrir e lê o resultado
 junto.
 
+### Tráfego pago: o gestor de tráfego e as skills de anúncio
+
+Um "gestor de tráfego" pra Meta (Facebook e Instagram), TikTok e Google, em três camadas: o
+conector oficial de cada plataforma lê a conta, as skills de fora dão o método, e uma skill
+nossa conversa em português e devolve o que achou como trabalho.
+
+- `gestor-de-trafego` (nossa): a porta de entrada. Confere quais conectores estão ligados, pede
+  o export certo quando não há nenhum, escolhe o método entre as skills abaixo e devolve peça
+  nova (criativo cansado), relatório semanal, alerta de verba ou de pixel e decisão. **Só
+  sugere: nunca muda verba, pausa nem cria campanha**, mesmo com conector que permite escrita.
+- `claude-ads`: o método do [AgriciDaniel/claude-ads](https://github.com/AgriciDaniel/claude-ads)
+  (licença MIT, em `plugins/skills/origens/claude-ads/`). Vem a skill condutora (no original,
+  `ads`), as referências e 12 sub-skills (auditoria, Meta, TikTok, Google, plano, verba, conta,
+  criativo, teste, acompanhamento, atribuição e rastreamento server-side) como arquivos em
+  `fluxos/`. Não vem o motor em Python, então não há nota de saúde da conta; o resto do método
+  funciona sem ele.
+- `ads` e `ad-creative`: estratégia de mídia paga e copy de anúncio em escala, do
+  [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) (licença
+  MIT, em `plugins/skills/origens/marketingskills/`).
+
+**Por que as sub-skills do claude-ads não são skill solta.** Cada skill ocupa espaço na lista
+de skills que o Claude Code carrega em toda conversa, e a lista tem orçamento: quando passa,
+as descrições das skills menos usadas são cortadas. Doze skills de anúncio iam empurrar as
+outras pra fora. Ficam como arquivo, e quem chega nelas é a `claude-ads` e a
+`gestor-de-trafego`.
+
+**Os conectores não vêm no plugin**, pelo mesmo motivo do Google Ads: cada um liga com o login
+de cada pessoa. Os oficiais são o da Meta (`https://mcp.facebook.com/ads`, beta), o do TikTok
+for Business e o do Google Ads (pela skill `google-ads-api-mcp-setup`). A skill
+`gestor-de-trafego` explica como ligar cada um e como deixar o da Meta só com leitura.
+
 ## A nossa cópia das skills de fora
 
 Skill que vem de outro repositório fica guardada aqui inteira, pra continuar existindo se o
@@ -95,6 +126,14 @@ autor mudar ou apagar a dele, com a origem e a licença em `plugins/skills/orige
 - **Google Ads:** toda segunda a Action `Espelho do Google Ads` confere o google/skills e, se
   alguma das três skills mudou, abre um PR com a diferença. Na mão:
   `node scripts/espelhar-google-ads.mjs` (o main de hoje) ou com um commit exato.
+- **claude-ads:** toda segunda a Action `Espelho do claude-ads` confere se saiu tag nova e, se
+  a parte que espelhamos mudou, abre um PR. Na mão: `node scripts/espelhar-claude-ads.mjs` (a
+  tag mais nova) ou com uma tag exata (`v2.0.2`).
+- **marketingskills:** toda segunda a Action `Espelho do marketingskills` confere se a `ads` ou
+  a `ad-creative` mudou e, se mudou, abre um PR. Na mão: `node scripts/espelhar-marketingskills.mjs`
+  (o main de hoje) ou com um commit exato.
+- O que os espelhos têm em comum (baixar só a pasta, pôr o gatilho, consertar o YAML) mora em
+  `scripts/espelho-comum.mjs`.
 - O espelho copia a skill como veio e acrescenta só o gatilho em português no fim da
   `description` e o bloco "Neste plugin" depois do frontmatter. O que for ajuste nosso entra
   por esse mesmo caminho, pra a atualização do autor não apagar.

@@ -1,11 +1,11 @@
 {
   "name": "skills",
-  "description": "As skills compartilhadas do MegaBrain num plugin só: instala uma vez e recebe toda skill nova sozinho. Hoje: engenharia reversa com o REA (morluto/rea, licença MIT), com o servidor MCP e sem precisar instalar Node; e diagnóstico do Google Ads com as skills oficiais do Google (google/skills, licença Apache-2.0).",
+  "description": "As skills compartilhadas do MegaBrain num plugin só: instala uma vez e recebe toda skill nova sozinho. Hoje: engenharia reversa com o REA (morluto/rea, licença MIT), com o servidor MCP e sem precisar instalar Node; diagnóstico do Google Ads com as skills oficiais do Google (google/skills, licença Apache-2.0); e um gestor de tráfego em português pra Meta, TikTok e Google, com o método do claude-ads (AgriciDaniel/claude-ads, licença MIT) e as skills ads e ad-creative do marketingskills (coreyhaines31/marketingskills, licença MIT).",
   "author": {
     "name": "Yago Siman"
   },
   "homepage": "https://github.com/yagosiman/MegaBrain-Skills",
   "repository": "https://github.com/yagosiman/MegaBrain-Skills",
   "license": "MIT AND Apache-2.0",
-  "keywords": ["skills", "engenharia-reversa", "reverse-engineering", "google-ads", "trafego-pago", "mcp"]
+  "keywords": ["skills", "engenharia-reversa", "reverse-engineering", "google-ads", "trafego-pago", "mcp", "meta-ads", "tiktok-ads", "gestor-de-trafego"]
 }

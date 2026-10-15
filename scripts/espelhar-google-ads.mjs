@@ -24,11 +24,10 @@
 // nada dele roda aqui.
 // =============================================================================
 
-import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { PE, baixar, comAspasOndeQuebra, comGatilho, conferirPedido, iguais, lerPasta, separar } from "./espelho-comum.mjs";
 
 const REPO = "https://github.com/google/skills.git";
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -45,12 +44,6 @@ const cabeca = (consertadas) => [
       ]
     : ["> da `description` são nossos; o resto veio como está."]),
   ">",
-];
-const PE = [
-  ">",
-  "> Com o conector do MegaBrain ligado, ao terminar registre com `skill_registrar`",
-  "> (tipo `uso` e o que fez numa frase; se falhou, tipo `erro` e o motivo): é o que",
-  "> mostra no painel de Skills do Cérebro que ela está viva.",
 ];
 
 // Cada skill: o gatilho em português (sem dois-pontos seguido de espaço nem
@@ -102,83 +95,13 @@ const SKILLS = {
   },
 };
 
-const pedido = process.argv[2] ?? "main";
-if (!/^[A-Za-z0-9._/-]+$/.test(pedido)) throw Error(`Commit ou ramo inesperado: "${pedido}"`);
-const git = (cwd, ...args) => execFileSync("git", args, { cwd, encoding: "utf8" }).trim();
-
-/** Todos os arquivos de uma pasta, por caminho relativo, pra saber se o texto mudou. */
-function lerPasta(pasta) {
-  const mapa = new Map();
-  if (!existsSync(pasta)) return mapa;
-  for (const item of readdirSync(pasta, { recursive: true, withFileTypes: true })) {
-    if (!item.isFile()) continue;
-    const cheio = path.join(item.parentPath, item.name);
-    mapa.set(path.relative(pasta, cheio), readFileSync(cheio, "utf8"));
-  }
-  return mapa;
-}
-const iguais = (a, b) => a.size === b.size && [...a].every(([k, v]) => b.get(k) === v);
-
-/**
- * Aspas em valor de primeiro nível que o YAML não aceita sem elas (dois-pontos
- * seguido de espaço, ou " #"). O original do diagnóstico vem assim na linha
- * `compatibility` ("tools: search, ..."), e frontmatter que não abre faz o
- * Claude carregar a skill sem `description`: ela nunca liga sozinha.
- * Devolve o texto e as chaves consertadas.
- */
-function comAspasOndeQuebra(frontmatter) {
-  const consertadas = [];
-  const texto = frontmatter
-    .split("\n")
-    .map((linha) => {
-      const m = linha.match(/^([A-Za-z_][\w-]*):\s+(.+)$/);
-      if (!m) return linha;
-      const [, chave, valor] = m;
-      if (/^["'>|[{&*!]/.test(valor) || !/: | #/.test(valor)) return linha;
-      consertadas.push(chave);
-      return `${chave}: ${JSON.stringify(valor)}`;
-    })
-    .join("\n");
-  return { texto, consertadas };
-}
-
-/** Põe o gatilho no fim da `description`, numa linha só ou num bloco `>-` / `|`. */
-function comGatilho(frontmatter, gatilho, nome) {
-  const linhas = frontmatter.split("\n");
-  const i = linhas.findIndex((l) => l.startsWith("description:"));
-  if (i < 0) throw Error(`${nome}: SKILL.md sem \`description:\`; o formato do Google mudou, revise o espelho.`);
-  const valor = linhas[i].slice("description:".length).trim();
-  if (!/^[>|][+-]?$/.test(valor)) {
-    if (/^["']/.test(valor)) throw Error(`${nome}: \`description\` entre aspas; revise o espelho.`);
-    linhas[i] = `${linhas[i]} ${gatilho}`;
-    return linhas.join("\n");
-  }
-  // Bloco: as linhas seguintes recuadas (ou em branco) são o texto.
-  let ultima = i;
-  for (let j = i + 1; j < linhas.length && (linhas[j] === "" || /^\s/.test(linhas[j])); j++) {
-    if (linhas[j].trim()) ultima = j;
-  }
-  if (ultima === i) throw Error(`${nome}: \`description\` em bloco vazio; revise o espelho.`);
-  const recuo = linhas[i + 1].match(/^\s*/)[0] || "  ";
-  linhas.splice(ultima + 1, 0, "", `${recuo}${gatilho}`);
-  return linhas.join("\n");
-}
+const pedido = conferirPedido(process.argv[2] ?? "main");
 
 // --- baixar só o que interessa do google/skills ------------------------------
-const tmp = mkdtempSync(path.join(tmpdir(), "espelho-google-ads-"));
-let commit;
-let data;
+const { tmp, commit, data } = baixar(REPO, pedido, ["/LICENSE", ...Object.keys(SKILLS).map((s) => `/skills/ads/${s}/`)]);
 const mudaram = [];
 const aspas = [];
 try {
-  git(tmp, "init", "-q");
-  git(tmp, "remote", "add", "origin", REPO);
-  git(tmp, "sparse-checkout", "set", "--no-cone", "/LICENSE", ...Object.keys(SKILLS).map((s) => `/skills/ads/${s}/`));
-  git(tmp, "fetch", "-q", "--depth", "1", "--filter=blob:none", "origin", pedido);
-  git(tmp, "checkout", "-q", "FETCH_HEAD");
-  commit = git(tmp, "rev-parse", "FETCH_HEAD");
-  data = git(tmp, "log", "-1", "--format=%cs", "FETCH_HEAD");
-
   for (const [nome, { gatilho, bloco }] of Object.entries(SKILLS)) {
     const de = path.join(tmp, "skills", "ads", nome);
     if (!existsSync(path.join(de, "SKILL.md"))) throw Error(`${nome}: não existe mais em google/skills@${commit}; revise SKILLS.`);
@@ -189,14 +112,11 @@ try {
     cpSync(de, para, { recursive: true });
 
     const arquivoSkill = path.join(para, "SKILL.md");
-    const texto = readFileSync(arquivoSkill, "utf8");
-    const fim = texto.indexOf("\n---\n", 4);
-    if (!texto.startsWith("---\n") || fim < 0) throw Error(`${nome}: SKILL.md sem frontmatter; o formato do Google mudou, revise o espelho.`);
-    const corte = fim + "\n---\n".length;
-    const { texto: frontmatter, consertadas } = comAspasOndeQuebra(comGatilho(texto.slice(0, corte), gatilho, nome));
+    const original = separar(readFileSync(arquivoSkill, "utf8"), nome);
+    const { texto: frontmatter, consertadas } = comAspasOndeQuebra(comGatilho(original.frontmatter, gatilho, nome));
     if (consertadas.length) aspas.push(`${nome} (${consertadas.join(", ")})`);
     const neste = ["", ...cabeca(consertadas), ...bloco, ...PE, ""].join("\n");
-    writeFileSync(arquivoSkill, frontmatter + neste + texto.slice(corte));
+    writeFileSync(arquivoSkill, frontmatter + neste + original.corpo);
 
     if (!iguais(antes, lerPasta(para))) mudaram.push(nome);
   }

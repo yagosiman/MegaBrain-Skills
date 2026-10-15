@@ -42,6 +42,46 @@
       "origem": "google/skills, licença Apache-2.0",
       "cor": "#fbbc04",
       "icone": "key-round"
+    },
+    {
+      "slug": "gestor-de-trafego",
+      "nome": "Gestor de tráfego",
+      "resumo": "Olha, audita e planeja anúncio pago na Meta, no TikTok e no Google, em português, e devolve o que achou como peça nova, relatório, alerta ou decisão.",
+      "quando": "A pessoa quer saber como estão os anúncios, montar a estratégia de tráfego de uma conta nova, conferir o pixel, achar criativo cansado, dividir a verba ou fazer o relatório semanal.",
+      "precisa": "nada pra conversar; com o conector oficial da Meta, do TikTok ou do Google Ads ligado, lê a conta sozinha (só leitura)",
+      "origem": "nossa",
+      "cor": "#f97316",
+      "icone": "megaphone"
+    },
+    {
+      "slug": "claude-ads",
+      "nome": "Auditoria de mídia paga (claude-ads)",
+      "resumo": "O método completo de auditoria e plano de mídia paga do claude-ads: Meta, TikTok, Google, verba, criativo, pixel, testes e acompanhamento.",
+      "quando": "A pessoa quer uma auditoria completa de uma ou mais contas de anúncio, ou um plano de mídia com estrutura, verba, medição e testes.",
+      "precisa": "o export da conta ou o conector da plataforma; sem a nota de saúde do original, que depende do motor em Python",
+      "origem": "AgriciDaniel/claude-ads, licença MIT",
+      "cor": "#8b5cf6",
+      "icone": "search"
+    },
+    {
+      "slug": "ads",
+      "nome": "Estratégia de anúncio pago",
+      "resumo": "Estrategista de mídia paga: estrutura de campanha, público, lance, verba e quando matar ou escalar um anúncio.",
+      "quando": "A pessoa pergunta como estruturar campanha, que público usar, quanto investir ou se deve pausar ou escalar um anúncio.",
+      "precisa": "nada; com o export ou o conector da plataforma, julga com os números da conta",
+      "origem": "coreyhaines31/marketingskills, licença MIT",
+      "cor": "#ef4444",
+      "icone": "bar-chart"
+    },
+    {
+      "slug": "ad-creative",
+      "nome": "Criativo de anúncio",
+      "resumo": "Gera e itera copy e variações de anúncio em escala: títulos, textos, ganchos de vídeo curto e roteiro de teste de criativo.",
+      "quando": "A pessoa pede variações de copy de anúncio, ganchos pra vídeo curto ou criativo novo pra substituir um que cansou.",
+      "precisa": "nada",
+      "origem": "coreyhaines31/marketingskills, licença MIT",
+      "cor": "#ec4899",
+      "icone": "image"
     }
   ]
 }

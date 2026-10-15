@@ -1,0 +1,55 @@
+# Toda segunda, confere se o claude-ads publicou tag nova (vX.Y.Z). Se a parte
+# que espelhamos mudou, roda o espelho e abre um PR com a diferença: nada entra
+# no main sem revisão, e a versão anterior fica no histórico do Git. Tag nova
+# que só mexe no motor em Python ou nos agentes (que não copiamos) não abre PR.
+#
+# Precisa, nas configurações do repositório: Settings → Actions → General →
+# "Allow GitHub Actions to create and approve pull requests".
+
+name: Espelho do claude-ads
+
+on:
+  schedule:
+    - cron: "30 11 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  espelhar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Espelhar a tag mais nova do claude-ads
+        id: espelho
+        run: |
+          node scripts/espelhar-claude-ads.mjs
+          versao=$(node -p 'require("fs").readFileSync("plugins/skills/origens/claude-ads/UPSTREAM.md","utf8").match(/Versão: `([^`]+)`/)[1]')
+          echo "versao=$versao" >> "$GITHUB_OUTPUT"
+          if [ -z "$(git status --porcelain plugins/skills)" ]; then echo "mudou=nao" >> "$GITHUB_OUTPUT"; else echo "mudou=sim" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Abrir PR
+        if: steps.espelho.outputs.mudou == 'sim'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ steps.espelho.outputs.versao }}
+        run: |
+          ramo="espelho/claude-ads-$VERSAO"
+          if git ls-remote --exit-code --heads origin "$ramo" > /dev/null; then
+            echo "Já existe PR aberto pra $VERSAO."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$ramo"
+          git add -A plugins/skills
+          git commit -m "claude-ads: espelho do AgriciDaniel/claude-ads@$VERSAO"
+          git push origin "$ramo"
+          gh pr create --title "claude-ads @ $VERSAO" \
+            --body "Saiu versão nova do claude-ads e a parte que espelhamos mudou. Revise o diff antes de aceitar: o que entrar aqui chega no Claude de quem instalou o plugin. Confira também se alguma sub-skill da lista FLUXOS passou a depender do motor em Python."
