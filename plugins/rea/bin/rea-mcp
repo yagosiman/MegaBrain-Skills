@@ -1,0 +1,145 @@
+#!/bin/bash
+# =============================================================================
+# rea-mcp — liga o servidor MCP do REA sem a pessoa instalar nada.
+#
+#   bin/rea-mcp              liga o servidor (é o que o .mcp.json chama)
+#   bin/rea-mcp --preparar   só deixa tudo pronto (o gancho de início de sessão chama)
+#
+# O REA roda em Node (22.19+, 24.11+ ou 26+). Usa o Node da máquina se ele servir;
+# senão, um Node privado na pasta de dados do plugin, baixado uma vez do nodejs.org (linha
+# 24, LTS) e conferido pelo SHA-256 publicado lá. Sem sudo e sem mexer no Node que
+# a pessoa já tenha. O pacote fica instalado em pacotes/, na mesma pasta, separado por
+# versão do REA e do Node, e liga em ~2 s.
+#
+# A primeira preparação leva uns 2 minutos, e o Claude Code espera um servidor por
+# 30 s e não tenta de novo sozinho. Por isso ela começa no gancho de início de
+# sessão, em segundo plano; se o servidor for chamado antes de ela terminar, espera
+# o que dá e sai avisando pra reconectar em /mcp.
+#
+# O stdout é o canal do protocolo MCP: tudo que este script fala vai pro stderr.
+# =============================================================================
+set -euo pipefail
+
+REA="rea-agents@6.5.0"   # o espelho (scripts/espelhar-rea.mjs) reescreve esta linha
+CASA="${REA_CASA:-${CLAUDE_PLUGIN_DATA:-$HOME/.cache/rea-plugin}}"
+NODE_PRIVADO="$CASA/node"
+ORIGEM_NODE="https://nodejs.org/dist/latest-v24.x"
+TRAVA="$CASA/.preparando-${REA}"
+REGISTRO="$CASA/preparar-${REA}.log"
+
+avisa() { printf '[rea] %s\n' "$*" >&2; }
+
+serve() {
+  local v maj min resto
+  v="$("$1" -p 'process.versions.node' 2>/dev/null)" || return 1
+  IFS=. read -r maj min resto <<<"$v"
+  [[ "$maj" =~ ^[0-9]+$ && "$min" =~ ^[0-9]+$ ]] || return 1
+  (( (maj == 22 && min >= 19) || (maj == 24 && min >= 11) || maj >= 26 ))
+}
+
+# Pasta bin do Node que vale agora (vazio se nenhum serve ainda).
+node_bin() {
+  local n
+  n="$(command -v node 2>/dev/null || true)"
+  if [ -n "$n" ] && serve "$n"; then dirname "$n"; return; fi
+  if [ -x "$NODE_PRIVADO/bin/node" ] && serve "$NODE_PRIVADO/bin/node"; then echo "$NODE_PRIVADO/bin"; fi
+}
+
+# Onde o pacote mora pra esse Node (módulo nativo depende da versão maior do Node).
+pasta_pacote() {
+  echo "$CASA/pacotes/${REA}-node$("$1/node" -p 'process.versions.node.split(".")[0]')"
+}
+
+baixar_node() {
+  local os arch tmp arquivo esperado obtido
+  case "$(uname -s)" in
+    Darwin) os=darwin ;;
+    Linux) os=linux ;;
+    *) avisa "sistema $(uname -s) sem instalação automática: instale o Node 24 em https://nodejs.org."; return 1 ;;
+  esac
+  case "$(uname -m)" in
+    arm64|aarch64) arch=arm64 ;;
+    x86_64|amd64) arch=x64 ;;
+    *) avisa "processador $(uname -m) sem instalação automática: instale o Node 24 em https://nodejs.org."; return 1 ;;
+  esac
+  avisa "baixando o Node 24 em $NODE_PRIVADO (~50 MB, só uma vez)."
+  tmp="$(mktemp -d "$CASA/.baixando.XXXXXX")"
+  curl -fsSL "$ORIGEM_NODE/SHASUMS256.txt" -o "$tmp/SHASUMS256.txt"
+  arquivo="$(grep -oE "node-v[0-9]+\.[0-9]+\.[0-9]+-$os-$arch\.tar\.gz" "$tmp/SHASUMS256.txt" | head -1)"
+  [ -n "$arquivo" ] || { rm -rf "$tmp"; avisa "o nodejs.org não tem Node 24 pra $os-$arch."; return 1; }
+  curl -fsSL "$ORIGEM_NODE/$arquivo" -o "$tmp/$arquivo"
+  esperado="$(grep " $arquivo\$" "$tmp/SHASUMS256.txt" | cut -d' ' -f1)"
+  if command -v shasum >/dev/null 2>&1; then
+    obtido="$(shasum -a 256 "$tmp/$arquivo" | cut -d' ' -f1)"
+  else
+    obtido="$(sha256sum "$tmp/$arquivo" | cut -d' ' -f1)"
+  fi
+  if [ -z "$esperado" ] || [ "$esperado" != "$obtido" ]; then
+    rm -rf "$tmp"; avisa "o Node baixado não bate com o SHA-256 do nodejs.org; nada foi instalado."; return 1
+  fi
+  tar -xzf "$tmp/$arquivo" -C "$tmp"
+  rm -rf "$NODE_PRIVADO"
+  mv "$tmp/${arquivo%.tar.gz}" "$NODE_PRIVADO"
+  rm -rf "$tmp"
+}
+
+preparar() {
+  local bin="" destino=""
+  mkdir -p "$CASA"
+  # Uma preparação por vez. Trava com mais de 20 min é de uma que morreu no meio.
+  if ! mkdir "$TRAVA" 2>/dev/null; then
+    if [ -n "$(find "$TRAVA" -maxdepth 0 -mmin +20 2>/dev/null)" ]; then
+      rm -rf "$TRAVA"; mkdir "$TRAVA"
+    else
+      return 0
+    fi
+  fi
+  trap 'rm -rf "$TRAVA"' EXIT
+
+  bin="$(node_bin)"
+  if [ -z "$bin" ]; then
+    baixar_node
+    bin="$NODE_PRIVADO/bin"
+  fi
+  destino="$(pasta_pacote "$bin")"
+  if [ ! -f "$destino/.pronto" ]; then
+    avisa "instalando $REA (~25 MB)."
+    rm -rf "$destino"
+    mkdir -p "$destino"
+    PATH="$bin:$PATH" "$bin/npm" install --prefix "$destino" --no-audit --no-fund --loglevel=error "$REA" >&2
+    touch "$destino/.pronto"
+    echo "REA preparado pela primeira vez neste computador. Se as ferramentas do REA não aparecerem nesta conversa, reconecte o servidor em /mcp."
+  fi
+}
+
+ligar() {
+  local bin="" destino="" i
+  bin="$(node_bin)"
+  if [ -n "$bin" ]; then destino="$(pasta_pacote "$bin")"; fi
+  if [ -z "$bin" ] || [ ! -f "$destino/.pronto" ]; then
+    # Primeira vez: prepara em segundo plano (se o gancho ainda não começou) e
+    # espera o que dá dentro dos 30 s do Claude Code.
+    mkdir -p "$CASA"
+    nohup bash "$0" --preparar >>"$REGISTRO" 2>&1 &
+    for i in $(seq 1 25); do
+      sleep 1
+      bin="$(node_bin)"
+      if [ -n "$bin" ]; then
+        destino="$(pasta_pacote "$bin")"
+        [ -f "$destino/.pronto" ] && break
+      fi
+    done
+    if [ -z "$bin" ] || [ ! -f "$destino/.pronto" ]; then
+      avisa "preparando o REA pela primeira vez (uns 2 minutos, só desta vez). Reconecte em /mcp quando terminar. Registro: $REGISTRO"
+      exit 1
+    fi
+  fi
+  export PATH="$bin:$PATH"
+  exec "$bin/node" "$destino/node_modules/rea-agents/scripts/rea.mjs" mcp
+}
+
+case "${1:-}" in
+  --preparar) preparar ;;
+  "") ligar ;;
+  *) avisa "uso: rea-mcp [--preparar]"; exit 2 ;;
+esac

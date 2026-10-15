@@ -1,0 +1,4 @@
+.DS_Store
+node_modules/
+# Lista de nomes da trava de dado privado: nunca vai pro repositório público.
+.nomes-proibidos

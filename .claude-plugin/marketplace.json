@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "yagosiman",
+  "description": "Skills do MegaBrain, num lugar só.",
+  "owner": {
+    "name": "Yago Siman"
+  },
+  "plugins": [
+    {
+      "name": "rea",
+      "description": "Engenharia reversa de app, binário, pacote, Electron, Android e página web. Traz a skill reverse-engineer-anything e o servidor MCP do REA juntos, sem precisar instalar Node (morluto/rea, licença MIT, espelhado aqui).",
+      "author": {
+        "name": "morluto"
+      },
+      "homepage": "https://github.com/morluto/rea",
+      "category": "development",
+      "source": "./plugins/rea"
+    }
+  ]
+}

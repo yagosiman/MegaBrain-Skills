@@ -1,0 +1,53 @@
+# Toda segunda, confere se saiu versão nova do rea-agents. Se saiu, roda o
+# espelho e abre um PR com a diferença: nada entra no main sem revisão, e a
+# versão anterior fica no histórico do Git.
+#
+# Precisa, nas configurações do repositório: Settings → Actions → General →
+# "Allow GitHub Actions to create and approve pull requests".
+
+name: Espelho do REA
+
+on:
+  schedule:
+    - cron: "0 11 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  espelhar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Espelhar a versão mais nova
+        id: espelho
+        run: |
+          node scripts/espelhar-rea.mjs
+          versao=$(node -p "require('./plugins/rea/.claude-plugin/plugin.json').version")
+          echo "versao=$versao" >> "$GITHUB_OUTPUT"
+          if git diff --quiet; then echo "mudou=nao" >> "$GITHUB_OUTPUT"; else echo "mudou=sim" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Abrir PR
+        if: steps.espelho.outputs.mudou == 'sim'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ steps.espelho.outputs.versao }}
+        run: |
+          ramo="espelho/rea-$VERSAO"
+          if git ls-remote --exit-code --heads origin "$ramo" > /dev/null; then
+            echo "Já existe PR aberto pra $VERSAO."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$ramo"
+          git commit -am "rea: espelho da versão $VERSAO"
+          git push origin "$ramo"
+          gh pr create --title "REA $VERSAO" \
+            --body "Versão nova do rea-agents publicada no npm. Revise o diff da skill antes de aceitar: o que entrar aqui chega no Claude de quem instalou o plugin."

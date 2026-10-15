@@ -1,0 +1,27 @@
+# Repositório público: confere cada push e cada PR atrás de dado privado.
+# A lista de nomes vem do secret CONFERIR_NOMES (Settings → Secrets → Actions),
+# nunca de arquivo no repositório. O aviso cita o número da entrada, não o nome.
+
+name: Conferir o que é público
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  conferir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Procurar dado privado
+        env:
+          CONFERIR_NOMES: ${{ secrets.CONFERIR_NOMES }}
+        run: node scripts/conferir-publico.mjs

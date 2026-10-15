@@ -1,0 +1,3 @@
+#!/bin/bash
+# Repositório público: nenhum commit passa com dado privado.
+exec node "$(git rev-parse --show-toplevel)/scripts/conferir-publico.mjs"
