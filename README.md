@@ -115,6 +115,15 @@ de cada pessoa. Os oficiais são o da Meta (`https://mcp.facebook.com/ads`, beta
 for Business e o do Google Ads (pela skill `google-ads-api-mcp-setup`). A skill
 `gestor-de-trafego` explica como ligar cada um e como deixar o da Meta só com leitura.
 
+### Leis brasileiras
+
+`leis-brasileiras` (nossa): responde dúvida legal e revisa contrato com o texto oficial na mão,
+citando a lei, o artigo e o link da fonte. O acervo é o [ctresb/leis](https://github.com/ctresb/leis)
+(Constituição, leis federais, estaduais e parte das municipais, atos de agências e súmulas, em
+Markdown; código MIT, textos de lei de domínio público pelo art. 8º da Lei 9.610/98). A skill não
+copia o acervo, que tem 4 GB: baixa só o arquivo da lei que a pergunta pede, na hora. Informa e
+não substitui advogado; diz quando o caso pede um.
+
 ## A nossa cópia das skills de fora
 
 Skill que vem de outro repositório fica guardada aqui inteira, pra continuar existindo se o

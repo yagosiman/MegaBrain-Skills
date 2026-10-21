@@ -82,6 +82,16 @@
       "origem": "coreyhaines31/marketingskills, licença MIT",
       "cor": "#ec4899",
       "icone": "image"
+    },
+    {
+      "slug": "leis-brasileiras",
+      "nome": "Leis brasileiras",
+      "resumo": "Responde dúvida legal e revisa contrato com o texto oficial da lei na mão: artigo exato e link da fonte, das leis federais às súmulas dos tribunais.",
+      "quando": "A pessoa pergunta se algo é legal, o que a lei diz, quer revisar um contrato antes de assinar ou conferir obrigação de MEI, nota fiscal, LGPD, direito autoral ou de consumidor.",
+      "precisa": "nada; baixa só a lei que precisa do acervo aberto (internet)",
+      "origem": "nossa, com o acervo ctresb/leis (código MIT, textos de lei de domínio público)",
+      "cor": "#a16207",
+      "icone": "scale"
     }
   ]
 }
