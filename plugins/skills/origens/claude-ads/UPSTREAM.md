@@ -3,7 +3,7 @@
 Espelho da parte de método do https://github.com/AgriciDaniel/claude-ads (licença MIT,
 em `LICENSE`). Gerado por `scripts/espelhar-claude-ads.mjs`; não edite à mão.
 
-- Versão: `v2.0.2`, commit `e38b53059829aef092f186dd2c9803615e18f25f` (2026-09-10)
+- Versão: `v2.1.0`, commit `4a74a5a2237caf2bc81091108164fe20e178818c` (2026-10-16)
 - Copiado como veio: `ads/SKILL.md` (vira `skills/claude-ads/SKILL.md`), a pasta
   `ads/references/` inteira e, de cada sub-skill, o `SKILL.md` (vira
   `skills/claude-ads/fluxos/<nome>.md`) e o resto da pasta (em `fluxos/<nome>/`):
