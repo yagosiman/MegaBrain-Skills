@@ -20,7 +20,7 @@
 # =============================================================================
 set -euo pipefail
 
-REA="rea-agents@6.5.0"   # o espelho (scripts/espelhar-rea.mjs) reescreve esta linha
+REA="rea-agents@6.7.0"   # o espelho (scripts/espelhar-rea.mjs) reescreve esta linha
 CASA="${REA_CASA:-${CLAUDE_PLUGIN_DATA:-$HOME/.cache/rea-plugin}}"
 NODE_PRIVADO="$CASA/node"
 ORIGEM_NODE="https://nodejs.org/dist/latest-v24.x"
