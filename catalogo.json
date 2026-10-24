@@ -92,6 +92,36 @@
       "origem": "nossa, com o acervo ctresb/leis (código MIT, textos de lei de domínio público)",
       "cor": "#a16207",
       "icone": "scale"
+    },
+    {
+      "slug": "gestor-de-instagram",
+      "nome": "Gestor de Instagram",
+      "resumo": "Escreve legenda, carrossel, roteiro de Reel e o plano da semana no tom de quem posta, estuda o que viralizou no nicho, arruma o perfil e tira a cara de IA do texto.",
+      "quando": "A pessoa pede post, legenda, carrossel, roteiro de Reel, pauta ou calendário de conteúdo, bio, hashtag ou quer saber por que um post do nicho viralizou.",
+      "precisa": "nada; com o navegador ou um print, lê os posts que a pessoa apontar. Não posta: entrega o texto pra ela colar",
+      "origem": "nossa, com o método do sergebulaev/instagram-skills (licença MIT)",
+      "cor": "#e1306c",
+      "icone": "video"
+    },
+    {
+      "slug": "find-skills",
+      "nome": "Achar skill",
+      "resumo": "Procura a skill que falta, primeiro nas instaladas e depois no diretório aberto de skills, confere procedência, licença e o que ela roda, e traz as melhores opções.",
+      "quando": "A pessoa pergunta se existe skill, plugin ou ferramenta pra uma tarefa, ou quer que o Claude aprenda a fazer algo novo.",
+      "precisa": "nada pra buscar; o comando npx skills (Node) pra instalar, só com o ok da pessoa",
+      "origem": "vercel-labs/skills, licença MIT (adaptada)",
+      "cor": "#111827",
+      "icone": "search"
+    },
+    {
+      "slug": "prospeccao",
+      "nome": "Prospecção",
+      "resumo": "Acha negócios da região que precisam do que tu vendes, qualifica pelo que falta neles, monta a prévia que prova o valor e deixa a primeira mensagem pronta pra ti mandar.",
+      "quando": "A pessoa quer prospectar, achar cliente novo, montar lista de leads ou preparar abordagem fria, pra ela ou pra empresa.",
+      "precisa": "nada; com navegador lê o Google Maps e o Instagram. Nunca manda mensagem: entrega rascunho",
+      "origem": "nossa",
+      "cor": "#16a34a",
+      "icone": "globe"
     }
   ]
 }

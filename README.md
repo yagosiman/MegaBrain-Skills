@@ -124,6 +124,40 @@ Markdown; código MIT, textos de lei de domínio público pelo art. 8º da Lei 9
 copia o acervo, que tem 4 GB: baixa só o arquivo da lei que a pergunta pede, na hora. Informa e
 não substitui advogado; diz quando o caso pede um.
 
+### Instagram
+
+`gestor-de-instagram` (nossa): o social media em português. Escreve legenda com gancho,
+carrossel slide a slide, roteiro de Reel e o plano da semana no tom de quem posta (lido no
+cérebro, quando o conector do MegaBrain está ligado), estuda o Reel que viralizou no nicho e
+transforma em roteiro original, arruma o perfil, escolhe hashtag e tira a cara de IA do texto
+antes de postar. **Escreve; quem posta é a pessoa**: não publica, não agenda, não responde
+comentário nem DM.
+
+O método vem do [sergebulaev/instagram-skills](https://github.com/sergebulaev/instagram-skills)
+(licença MIT, em `plugins/skills/origens/instagram-skills/`): as 9 skills do autor ficam como
+arquivo em `gestor-de-instagram/metodo/`, com o texto como veio, e a porta em português escolhe
+qual ler. Não vêm o publicador (Publora) nem os leitores pagos (Apify, Pixfaro) em Python: o
+post que se estuda chega por print, pelo navegador da conversa ou pelo conector do Apify, se a
+própria pessoa ligar.
+
+### Prospecção
+
+`prospeccao` (nossa): o SDR de quem vende serviço. Define o cliente ideal, acha negócios da
+região em fonte pública (Google Maps, Instagram, site), qualifica pelo que falta neles, monta a
+prévia que ninguém pediu (o estudo que prova o valor antes da conversa) e escreve a primeira
+mensagem e os retornos. Serve pra mais de um perfil de quem vende (o estúdio de alguém e a
+empresa em que ele é sócio, por exemplo), com uma lista pra cada e um dono por negócio. **Nunca
+manda mensagem**: a abordagem é da pessoa, uma por uma, e o "não quero" vale na hora.
+
+### Achar skill
+
+`find-skills`: adaptada da `find-skills` do [vercel-labs/skills](https://github.com/vercel-labs/skills)
+(licença MIT, em `plugins/skills/origens/find-skills/`). Quando a pessoa pergunta se existe skill
+pra uma tarefa, olha primeiro as instaladas e este catálogo, depois o diretório aberto
+([skills.sh](https://skills.sh/) e `npx skills find`), confere procedência, licença e o que a
+skill roda, e traz as opções. Instala só com o ok; skill pra todo mundo receber entra por aqui,
+no plugin, não solta.
+
 ## A nossa cópia das skills de fora
 
 Skill que vem de outro repositório fica guardada aqui inteira, pra continuar existindo se o
@@ -141,6 +175,12 @@ autor mudar ou apagar a dele, com a origem e a licença em `plugins/skills/orige
 - **marketingskills:** toda segunda a Action `Espelho do marketingskills` confere se a `ads` ou
   a `ad-creative` mudou e, se mudou, abre um PR. Na mão: `node scripts/espelhar-marketingskills.mjs`
   (o main de hoje) ou com um commit exato.
+- **instagram-skills:** toda segunda a Action `Espelho do instagram-skills` confere se saiu tag
+  nova e, se o método que guardamos mudou, abre um PR. O espelho só reescreve
+  `gestor-de-instagram/metodo/`; a porta é nossa. Na mão: `node scripts/espelhar-instagram-skills.mjs`
+  (a tag mais nova) ou com uma tag exata (`v1.0.32`).
+- **find-skills:** não tem espelho, porque foi reescrita em português; a revisão contra o
+  original é à mão (ver `origens/find-skills/UPSTREAM.md`).
 - O que os espelhos têm em comum (baixar só a pasta, pôr o gatilho, consertar o YAML) mora em
   `scripts/espelho-comum.mjs`.
 - O espelho copia a skill como veio e acrescenta só o gatilho em português no fim da

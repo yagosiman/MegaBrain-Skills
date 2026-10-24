@@ -1,0 +1,55 @@
+# Toda segunda, confere se o instagram-skills publicou tag nova (vX.Y.Z). Se a parte
+# que espelhamos mudou, roda o espelho e abre um PR com a diferença: nada entra
+# no main sem revisão, e a versão anterior fica no histórico do Git. Tag nova
+# que só mexe no publicador em Python (que não copiamos) não abre PR.
+#
+# Precisa, nas configurações do repositório: Settings → Actions → General →
+# "Allow GitHub Actions to create and approve pull requests".
+
+name: Espelho do instagram-skills
+
+on:
+  schedule:
+    - cron: "45 11 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  espelhar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Espelhar a tag mais nova do instagram-skills
+        id: espelho
+        run: |
+          node scripts/espelhar-instagram-skills.mjs
+          versao=$(node -p 'require("fs").readFileSync("plugins/skills/origens/instagram-skills/UPSTREAM.md","utf8").match(/Versão: `([^`]+)`/)[1]')
+          echo "versao=$versao" >> "$GITHUB_OUTPUT"
+          if [ -z "$(git status --porcelain plugins/skills)" ]; then echo "mudou=nao" >> "$GITHUB_OUTPUT"; else echo "mudou=sim" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Abrir PR
+        if: steps.espelho.outputs.mudou == 'sim'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ steps.espelho.outputs.versao }}
+        run: |
+          ramo="espelho/instagram-skills-$VERSAO"
+          if git ls-remote --exit-code --heads origin "$ramo" > /dev/null; then
+            echo "Já existe PR aberto pra $VERSAO."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$ramo"
+          git add -A plugins/skills
+          git commit -m "instagram-skills: espelho do sergebulaev/instagram-skills@$VERSAO"
+          git push origin "$ramo"
+          gh pr create --title "instagram-skills @ $VERSAO" \
+            --body "Saiu versão nova do instagram-skills e a parte que espelhamos mudou. Revise o diff antes de aceitar: o que entrar aqui chega no Claude de quem instalou o plugin. Confira também se algum método da lista METODOS passou a depender do publicador ou do leitor em Python, e se a tabela da porta gestor-de-instagram ainda bate."
